@@ -1,0 +1,293 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3772956B14A37F0B00977552 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3772956A14A37F0B00977552 /* Cocoa.framework */; };
+		3772957514A37F0B00977552 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3772957314A37F0B00977552 /* InfoPlist.strings */; };
+		3772957714A37F0B00977552 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3772957614A37F0B00977552 /* main.m */; };
+		3772957B14A37F0B00977552 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 3772957914A37F0B00977552 /* Credits.rtf */; };
+		3772957E14A37F0B00977552 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3772957D14A37F0B00977552 /* AppDelegate.m */; };
+		3772958114A37F0B00977552 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3772957F14A37F0B00977552 /* MainMenu.xib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		3772956614A37F0B00977552 /* DJSwitchControl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DJSwitchControl.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3772956A14A37F0B00977552 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		3772956D14A37F0B00977552 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		3772956E14A37F0B00977552 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		3772956F14A37F0B00977552 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		3772957214A37F0B00977552 /* DJSwitchControl-Info.plist */ = {isa = PBXFileReference; path = "DJSwitchControl-Info.plist"; sourceTree = "<group>"; };
+		3772957414A37F0B00977552 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		3772957614A37F0B00977552 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		3772957814A37F0B00977552 /* DJSwitchControl-Prefix.pch */ = {isa = PBXFileReference; path = "DJSwitchControl-Prefix.pch"; sourceTree = "<group>"; };
+		3772957A14A37F0B00977552 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		3772957C14A37F0B00977552 /* AppDelegate.h */ = {isa = PBXFileReference; path = AppDelegate.h; sourceTree = "<group>"; };
+		3772957D14A37F0B00977552 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		3772958014A37F0B00977552 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3772956314A37F0B00977552 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3772956B14A37F0B00977552 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3772955B14A37F0B00977552 = {
+			isa = PBXGroup;
+			children = (
+				3772957014A37F0B00977552 /* DJSwitchControl */,
+				3772956914A37F0B00977552 /* Frameworks */,
+				3772956714A37F0B00977552 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		3772956714A37F0B00977552 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3772956614A37F0B00977552 /* DJSwitchControl.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3772956914A37F0B00977552 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3772956A14A37F0B00977552 /* Cocoa.framework */,
+				3772956C14A37F0B00977552 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		3772956C14A37F0B00977552 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3772956D14A37F0B00977552 /* AppKit.framework */,
+				3772956E14A37F0B00977552 /* CoreData.framework */,
+				3772956F14A37F0B00977552 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		3772957014A37F0B00977552 /* DJSwitchControl */ = {
+			isa = PBXGroup;
+			children = (
+				3772957C14A37F0B00977552 /* AppDelegate.h */,
+				3772957D14A37F0B00977552 /* AppDelegate.m */,
+				3772957F14A37F0B00977552 /* MainMenu.xib */,
+				3772957114A37F0B00977552 /* Supporting Files */,
+			);
+			path = DJSwitchControl;
+			sourceTree = "<group>";
+		};
+		3772957114A37F0B00977552 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				3772957214A37F0B00977552 /* DJSwitchControl-Info.plist */,
+				3772957314A37F0B00977552 /* InfoPlist.strings */,
+				3772957614A37F0B00977552 /* main.m */,
+				3772957814A37F0B00977552 /* DJSwitchControl-Prefix.pch */,
+				3772957914A37F0B00977552 /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3772956514A37F0B00977552 /* DJSwitchControl */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3772958414A37F0B00977552 /* Build configuration list for PBXNativeTarget "DJSwitchControl" */;
+			buildPhases = (
+				3772956214A37F0B00977552 /* Sources */,
+				3772956314A37F0B00977552 /* Frameworks */,
+				3772956414A37F0B00977552 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DJSwitchControl;
+			productName = DJSwitchControl;
+			productReference = 3772956614A37F0B00977552 /* DJSwitchControl.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3772955D14A37F0B00977552 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = 3772956014A37F0B00977552 /* Build configuration list for PBXProject "DJSwitchControl" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 3772955B14A37F0B00977552;
+			productRefGroup = 3772956714A37F0B00977552 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3772956514A37F0B00977552 /* DJSwitchControl */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3772956414A37F0B00977552 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3772957514A37F0B00977552 /* InfoPlist.strings in Resources */,
+				3772957B14A37F0B00977552 /* Credits.rtf in Resources */,
+				3772958114A37F0B00977552 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3772956214A37F0B00977552 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3772957714A37F0B00977552 /* main.m in Sources */,
+				3772957E14A37F0B00977552 /* AppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		3772957314A37F0B00977552 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3772957414A37F0B00977552 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		3772957914A37F0B00977552 /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3772957A14A37F0B00977552 /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		3772957F14A37F0B00977552 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3772958014A37F0B00977552 /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		3772958214A37F0B00977552 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		3772958314A37F0B00977552 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		3772958514A37F0B00977552 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "DJSwitchControl/DJSwitchControl-Prefix.pch";
+				INFOPLIST_FILE = "DJSwitchControl/DJSwitchControl-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		3772958614A37F0B00977552 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "DJSwitchControl/DJSwitchControl-Prefix.pch";
+				INFOPLIST_FILE = "DJSwitchControl/DJSwitchControl-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3772956014A37F0B00977552 /* Build configuration list for PBXProject "DJSwitchControl" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3772958214A37F0B00977552 /* Debug */,
+				3772958314A37F0B00977552 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3772958414A37F0B00977552 /* Build configuration list for PBXNativeTarget "DJSwitchControl" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3772958514A37F0B00977552 /* Debug */,
+				3772958614A37F0B00977552 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3772955D14A37F0B00977552 /* Project object */;
+}

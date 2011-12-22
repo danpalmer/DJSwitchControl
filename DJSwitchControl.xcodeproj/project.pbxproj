@@ -14,6 +14,9 @@
 		3772957E14A37F0B00977552 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3772957D14A37F0B00977552 /* AppDelegate.m */; };
 		3772958114A37F0B00977552 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3772957F14A37F0B00977552 /* MainMenu.xib */; };
 		3772958814A3800C00977552 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 3772958714A3800C00977552 /* README.md */; };
+		3772959114A38EEF00977552 /* DJSwitchControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 3772959014A38EEF00977552 /* DJSwitchControl.m */; };
+		3772959314A39EAF00977552 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3772959214A39EAF00977552 /* QuartzCore.framework */; };
+		3772959614A3A07700977552 /* NSColor+CGColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 3772959514A3A07700977552 /* NSColor+CGColor.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +34,11 @@
 		3772957D14A37F0B00977552 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		3772958014A37F0B00977552 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		3772958714A3800C00977552 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
+		3772958F14A38EEF00977552 /* DJSwitchControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DJSwitchControl.h; sourceTree = "<group>"; };
+		3772959014A38EEF00977552 /* DJSwitchControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DJSwitchControl.m; sourceTree = "<group>"; };
+		3772959214A39EAF00977552 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		3772959414A3A07700977552 /* NSColor+CGColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSColor+CGColor.h"; sourceTree = "<group>"; };
+		3772959514A3A07700977552 /* NSColor+CGColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSColor+CGColor.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,6 +46,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3772959314A39EAF00977552 /* QuartzCore.framework in Frameworks */,
 				3772956B14A37F0B00977552 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -66,6 +75,7 @@
 		3772956914A37F0B00977552 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				3772959214A39EAF00977552 /* QuartzCore.framework */,
 				3772956A14A37F0B00977552 /* Cocoa.framework */,
 				3772956C14A37F0B00977552 /* Other Frameworks */,
 			);
@@ -85,6 +95,7 @@
 		3772957014A37F0B00977552 /* DJSwitchControl */ = {
 			isa = PBXGroup;
 			children = (
+				3772958E14A38EEF00977552 /* SwitchControl */,
 				3772957C14A37F0B00977552 /* AppDelegate.h */,
 				3772957D14A37F0B00977552 /* AppDelegate.m */,
 				3772957F14A37F0B00977552 /* MainMenu.xib */,
@@ -103,6 +114,17 @@
 				3772957914A37F0B00977552 /* Credits.rtf */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		3772958E14A38EEF00977552 /* SwitchControl */ = {
+			isa = PBXGroup;
+			children = (
+				3772958F14A38EEF00977552 /* DJSwitchControl.h */,
+				3772959014A38EEF00977552 /* DJSwitchControl.m */,
+				3772959414A3A07700977552 /* NSColor+CGColor.h */,
+				3772959514A3A07700977552 /* NSColor+CGColor.m */,
+			);
+			path = SwitchControl;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -171,6 +193,8 @@
 			files = (
 				3772957714A37F0B00977552 /* main.m in Sources */,
 				3772957E14A37F0B00977552 /* AppDelegate.m in Sources */,
+				3772959114A38EEF00977552 /* DJSwitchControl.m in Sources */,
+				3772959614A3A07700977552 /* NSColor+CGColor.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

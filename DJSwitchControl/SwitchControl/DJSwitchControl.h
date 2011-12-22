@@ -10,7 +10,7 @@
 
 @interface DJSwitchControl : NSView
 
-@property (assign, getter = isOn) BOOL on;
+@property (nonatomic, assign, getter = isOn) BOOL on;
 @property (assign) __weak id target;
 @property (assign) SEL action;
 

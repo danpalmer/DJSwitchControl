@@ -34,9 +34,13 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 @interface DJSwitchControl ()
 
 @property (retain) CALayer *knobLayer;
+@property (retain) CALayer *onLayer;
+@property (retain) CALayer *offLayer;
 @property (copy) void (^mouseTrackingBlock)(NSEvent *);
 
 - (void)setupLayers;
+- (void)switchToOn;
+- (void)switchToOff;
 - (void)performAction;
 - (void)moveSwitchToNewOffset:(NSInteger)newOffset disableAnimations:(BOOL)disableAnimations;
 
@@ -49,6 +53,8 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 @synthesize action=_action;
 
 @synthesize knobLayer=_knobLayer;
+@synthesize onLayer=_onLayer;
+@synthesize offLayer=_offLayer;
 @synthesize mouseTrackingBlock=_mouseTrackingBlock;
 
 #pragma mark -
@@ -73,7 +79,7 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 	CALayer *knobLayer = [[[CALayer alloc] init] autorelease];
 	{
 		[knobLayer setName:DJSwitchControlLayerKnob];
-		[knobLayer setFrame:CGRectMake(1, 1, KNOB_DIAMETER, KNOB_DIAMETER)];
+		[knobLayer setFrame:CGRectMake(0, 1, KNOB_DIAMETER, KNOB_DIAMETER)];
 		[knobLayer setBackgroundColor:[[NSColor grayColor] CGColor]];
 		[knobLayer setCornerRadius:KNOB_CORNER_RADIUS];
 		[knobLayer setDelegate:self];
@@ -94,18 +100,19 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 			[offTextLayer setForegroundColor:[[NSColor darkGrayColor] CGColor]];
 			
 			CGSize preferredSize = [offTextLayer preferredFrameSize];
-			[offTextLayer setFrame:CGRectMake(lroundf((((BACKGROUND_SECTION_WIDTH - KNOB_RADIUS) / 2.0) - (preferredSize.width / 2.0)) + KNOB_RADIUS), 
+			[offTextLayer setFrame:CGRectMake(lroundf((((BACKGROUND_SECTION_WIDTH - KNOB_RADIUS) / 2.0) - (preferredSize.width / 2.0)) + (KNOB_RADIUS * 0.75)), 
 											  ((BACKGROUND_SECTION_HEIGHT / 2.0) - (preferredSize.height / 2.0)), 
 											  preferredSize.width, 
 											  preferredSize.height)];
 		}
 		[offLayer addSublayer:offTextLayer];
 	}
+	[self setOffLayer:offLayer];
 	
 	CALayer *onLayer = [[[CALayer alloc] init] autorelease];
 	{
 		[onLayer setName:DJSwitchControlLayerOn];
-		[onLayer setFrame:CGRectMake((KNOB_RADIUS-BACKGROUND_SECTION_WIDTH), 0, BACKGROUND_SECTION_WIDTH, BACKGROUND_SECTION_HEIGHT)];
+		[onLayer setFrame:CGRectMake((KNOB_RADIUS - BACKGROUND_SECTION_WIDTH), 0, BACKGROUND_SECTION_WIDTH, BACKGROUND_SECTION_HEIGHT)];
 		[onLayer setBackgroundColor:[[NSColor blueColor] CGColor]];
 		[onLayer setDelegate:self];
 		CATextLayer *onTextLayer = [[[CATextLayer alloc] init] autorelease];
@@ -117,13 +124,14 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 			[onTextLayer setForegroundColor:[[NSColor whiteColor] CGColor]];
 			
 			CGSize preferredSize = [onTextLayer preferredFrameSize];
-			[onTextLayer setFrame:CGRectMake(lroundf((((BACKGROUND_SECTION_WIDTH - KNOB_RADIUS) / 2.0) - (preferredSize.width / 2.0)) + KNOB_RADIUS), 
+			[onTextLayer setFrame:CGRectMake(lroundf((((BACKGROUND_SECTION_WIDTH - KNOB_RADIUS) / 2.0) - (preferredSize.width / 2.0)) + (KNOB_RADIUS * 0.25)), 
 											  ((BACKGROUND_SECTION_HEIGHT / 2.0) - (preferredSize.height / 2.0)), 
 											  preferredSize.width, 
 											  preferredSize.height)];
 		}
 		[onLayer addSublayer:onTextLayer];
 	}
+	[self setOnLayer:onLayer];
 	
 	
 	[rootLayer addSublayer:offLayer];
@@ -132,6 +140,15 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 	
 	[self setLayer:rootLayer];
 	[self setWantsLayer:YES];
+}
+
+- (void)setOn:(BOOL)on {
+	_on = on;
+	if (on) {
+		[self switchToOn];
+	} else {
+		[self switchToOff];
+	}
 }
 
 #pragma mark -
@@ -145,7 +162,7 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 		NSInteger newOffset = [[self knobLayer] frame].origin.x + [currentEvent deltaX];
 		
 		if ([currentEvent type] == NSLeftMouseDown) {
-			//[self moveSwitchToNewOffset:newOffset disableAnimations:NO];
+			// change state to pressed
 		}
 		
 		if ([currentEvent type] == NSLeftMouseDragged) {
@@ -153,11 +170,17 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 		}
 		
 		if ([currentEvent type] == NSLeftMouseUp) {
-			[self moveSwitchToNewOffset:newOffset disableAnimations:NO];
 			
-			if (labs(originalOffset - newOffset) > (CONTROL_WIDTH / 2)) {
-				// the knob has moved more than half way, snap it.
-				NSLog(@"%ld", (originalOffset - newOffset));
+			if (originalOffset == newOffset) {
+				if (originalOffset == 0) {
+					[self switchToOn];
+				} else {
+					[self switchToOff];
+				}
+			} else if (newOffset < ((CONTROL_WIDTH - KNOB_DIAMETER) / 2.0)) {
+				[self setOn:NO];
+			} else {
+				[self setOn:YES];
 			}
 			
 			[self setMouseTrackingBlock:nil];
@@ -169,19 +192,25 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 }
 
 - (void)mouseDragged:(NSEvent *)event {
-	if ([self mouseTrackingBlock] == nil) {
-		return;
-	}
+	if ([self mouseTrackingBlock] == nil) return;
 	
 	[self mouseTrackingBlock](event);
 }
 
 - (void)mouseUp:(NSEvent *)event {
-	if ([self mouseTrackingBlock] == nil) {
-		return;
-	}
+	if ([self mouseTrackingBlock] == nil) return;
 	
 	[self mouseTrackingBlock](event);
+}
+
+- (void)switchToOn {
+	[self moveSwitchToNewOffset:(CONTROL_WIDTH - KNOB_DIAMETER) disableAnimations:NO];
+	[self performAction];
+}
+
+- (void)switchToOff {
+	[self moveSwitchToNewOffset:0 disableAnimations:NO];
+	[self performAction];
 }
 
 - (void)performAction {
@@ -197,13 +226,32 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 
 - (void)moveSwitchToNewOffset:(NSInteger)newOffset disableAnimations:(BOOL)disableAnimations {
 	
-	CGRect newRect = [[self knobLayer] frame];
-	newRect.origin.x = newOffset;
+	if (newOffset > (CONTROL_WIDTH - KNOB_DIAMETER)) {
+		newOffset = (CONTROL_WIDTH - KNOB_DIAMETER);
+	}
+	
+	if (newOffset < 0) {
+		newOffset = 0;
+	}
+	
+	CGRect newKnobRect = [[self knobLayer] frame];
+	newKnobRect.origin.x = newOffset;
+	
+	CGRect newOnLayerRect = [[self onLayer] frame];
+	newOnLayerRect.origin.x = newOffset + (KNOB_RADIUS - BACKGROUND_SECTION_WIDTH);
+	
+	CGRect newOffLayerRect = [[self offLayer] frame];
+	newOffLayerRect.origin.x = newOffset + KNOB_RADIUS;
 	
 	[CATransaction begin];
 	{
+		[CATransaction setAnimationDuration:0.2];
+		[CATransaction setAnimationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
 		[CATransaction setDisableActions:disableAnimations];
-		[[self knobLayer] setFrame:newRect];
+		
+		[[self knobLayer] setFrame:newKnobRect];
+		[[self onLayer] setFrame:newOnLayerRect];
+		[[self offLayer] setFrame:newOffLayerRect];
 	}
 	[CATransaction commit];
 }

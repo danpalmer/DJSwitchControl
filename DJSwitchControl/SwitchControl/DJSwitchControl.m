@@ -10,8 +10,6 @@
 
 #import <QuartzCore/QuartzCore.h>
 
-#import "NSColor+CGColor.h"
-
 #define CONTROL_HEIGHT 30.0
 #define CONTROL_WIDTH 80.0
 #define CONTROL_CORNER_RADIUS (CONTROL_HEIGHT/2.0)
@@ -31,6 +29,35 @@ NSString *const DJSwitchControlLayerKnob = @"knobLayer";
 NSString *const DJSwitchControlLayerOn = @"onLayer";
 NSString *const DJSwitchControlLayerOff = @"offLayer";
 
+#pragma mark -
+#pragma mark Categories
+
+@interface NSColor (DJSwitchControlAdditions)
+- (CGColorRef)CGColor;
++ (NSColor *)onStateColor;
+@end
+
+@implementation NSColor (DJSwitchControlAdditions)
+
+- (CGColorRef)CGColor {
+	CGColorSpaceRef colorSpace = [[self colorSpace] CGColorSpace];
+	NSInteger componentCount = [self numberOfComponents];
+	CGFloat *components = (CGFloat *)calloc(componentCount, sizeof(CGFloat));
+	[self getComponents:components];
+	CGColorRef color = CGColorCreate(colorSpace, components);
+	free((void*)components);
+	return color;
+}
+
++ (NSColor *)onStateColor {
+	return [NSColor colorWithDeviceRed:0.0000 green:0.4980 blue:0.9176 alpha:1.0000];
+}
+
+@end
+
+#pragma mark -
+#pragma mark Private Interface
+
 @interface DJSwitchControl ()
 
 @property (retain) CALayer *knobLayer;
@@ -38,11 +65,18 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 @property (retain) CALayer *offLayer;
 @property (copy) void (^mouseTrackingBlock)(NSEvent *);
 
+@property (nonatomic, assign, getter=isActive) BOOL active;
+
 - (void)setupLayers;
 - (void)switchToOn;
 - (void)switchToOff;
 - (void)performAction;
 - (void)moveSwitchToNewOffset:(NSInteger)newOffset disableAnimations:(BOOL)disableAnimations;
+- (void)drawRootLayer:(CALayer *)layer inContext:(CGContextRef)context;
+- (void)drawKnobLayer:(CALayer *)layer inContext:(CGContextRef)context;
+- (void)drawOnLayer:(CALayer *)layer inContext:(CGContextRef)context;
+- (void)drawOffLayer:(CALayer *)layer inContext:(CGContextRef)context;
+CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef startColor, CGColorRef endColor);
 
 @end
 
@@ -56,6 +90,8 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 @synthesize onLayer=_onLayer;
 @synthesize offLayer=_offLayer;
 @synthesize mouseTrackingBlock=_mouseTrackingBlock;
+
+@synthesize active=_active;
 
 #pragma mark -
 #pragma mark Initialisation
@@ -84,6 +120,11 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 		[knobLayer setCornerRadius:KNOB_CORNER_RADIUS];
 		[knobLayer setDelegate:self];
 		[knobLayer setNeedsDisplay];
+		
+		[knobLayer setShadowColor:[[NSColor blackColor] CGColor]];
+		[knobLayer setShadowOffset:CGSizeMake(0, 0)];
+		[knobLayer setShadowRadius:3.0];
+		[knobLayer setShadowOpacity:1.0];
 	}
 	[self setKnobLayer:knobLayer];
 	
@@ -99,7 +140,13 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 			[offTextLayer setString:@"OFF"];
 			[offTextLayer setFontSize:SWITCH_FONT_SIZE];
 			[offTextLayer setFont:@"Helvetica Neue Bold"];
-			[offTextLayer setForegroundColor:[[NSColor darkGrayColor] CGColor]];
+			[offTextLayer setForegroundColor:[[NSColor grayColor] CGColor]];
+			
+			// TODO: make this an inner shadow
+//			[offTextLayer setShadowOffset:CGSizeMake(0, 1)];
+//			[offTextLayer setShadowColor:[[NSColor blackColor] CGColor]];
+//			[offTextLayer setShadowRadius:0.0];
+//			[offTextLayer setShadowOpacity:0.5];
 			
 			CGSize preferredSize = [offTextLayer preferredFrameSize];
 			[offTextLayer setFrame:CGRectMake(lroundf((((BACKGROUND_SECTION_WIDTH - KNOB_RADIUS) / 2.0) - (preferredSize.width / 2.0)) + (KNOB_RADIUS * 0.75)), 
@@ -116,7 +163,7 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 	{
 		[onLayer setName:DJSwitchControlLayerOn];
 		[onLayer setFrame:CGRectMake((KNOB_RADIUS - BACKGROUND_SECTION_WIDTH), 0, BACKGROUND_SECTION_WIDTH, BACKGROUND_SECTION_HEIGHT)];
-		[onLayer setBackgroundColor:[[NSColor blueColor] CGColor]];
+		[onLayer setBackgroundColor:[[NSColor onStateColor] CGColor]];
 		[onLayer setDelegate:self];
 		CATextLayer *onTextLayer = [[[CATextLayer alloc] init] autorelease];
 		{
@@ -125,6 +172,11 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 			[onTextLayer setFontSize:SWITCH_FONT_SIZE];
 			[onTextLayer setFont:@"Helvetica Neue Bold"];
 			[onTextLayer setForegroundColor:[[NSColor whiteColor] CGColor]];
+			
+			[onTextLayer setShadowOffset:CGSizeMake(0, 1)];
+			[onTextLayer setShadowColor:[[NSColor blackColor] CGColor]];
+			[onTextLayer setShadowRadius:0.0];
+			[onTextLayer setShadowOpacity:0.5];
 			
 			CGSize preferredSize = [onTextLayer preferredFrameSize];
 			[onTextLayer setFrame:CGRectMake(lroundf((((BACKGROUND_SECTION_WIDTH - KNOB_RADIUS) / 2.0) - (preferredSize.width / 2.0)) + (KNOB_RADIUS * 0.25)), 
@@ -170,6 +222,15 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 	}
 }
 
+- (void)setActive:(BOOL)active {
+	_active = active;
+	[self setNeedsDisplay:YES];
+}
+
+- (void)setOnColor:(NSColor *)color {
+	// TODO: set this.
+}
+
 #pragma mark -
 #pragma mark Event Handlers
 
@@ -187,7 +248,7 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 		NSInteger newOffset = originalOffset + (localPoint.x - mouseOffset);
 		
 		if ([currentEvent type] == NSLeftMouseDown) {
-			// change state to pressed
+			[self setActive:YES];
 		}
 		
 		if ([currentEvent type] == NSLeftMouseDragged) {
@@ -208,6 +269,7 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 				[self setOn:YES];
 			}
 			
+			[self setActive:NO];
 			[self setMouseTrackingBlock:nil];
 			return;
 		}
@@ -245,14 +307,6 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 #pragma mark -
 #pragma mark Layer Drawing
 
-- (void)drawLayer:(CALayer *)layer inContext:(CGContextRef)ctx {
-	NSLog(@"Drawing %@", [layer name]);
-}
-
-- (void)drawRect:(NSRect)dirtyRect {
-	
-}
-
 - (void)moveSwitchToNewOffset:(NSInteger)newOffset disableAnimations:(BOOL)disableAnimations {
 	
 	if (newOffset > (CONTROL_WIDTH - KNOB_DIAMETER)) {
@@ -283,6 +337,72 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 		[[self offLayer] setFrame:newOffLayerRect];
 	}
 	[CATransaction commit];
+}
+
+- (void)drawLayer:(CALayer *)layer inContext:(CGContextRef)ctx {
+	if ([[layer name] isEqual:DJSwitchControlLayerRoot]) {
+		[self drawRootLayer:layer inContext:ctx];
+	} else if ([[layer name] isEqual:DJSwitchControlLayerKnob]) {
+		[self drawKnobLayer:layer inContext:ctx];
+	} else if ([[layer name] isEqual:DJSwitchControlLayerOn]) {
+		[self drawOnLayer:layer inContext:ctx];
+	} else if ([[layer name] isEqual:DJSwitchControlLayerOff]) {
+		[self drawOffLayer:layer inContext:ctx];
+	}
+}
+
+- (void)drawRootLayer:(CALayer *)layer inContext:(CGContextRef)context {
+	
+}
+
+- (void)drawKnobLayer:(CALayer *)layer inContext:(CGContextRef)context {
+	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceGray();
+	CGRect knobRect = CGRectInset([[self knobLayer] bounds], 1, 1);
+	CGFloat knobRadius = [[self knobLayer] bounds].size.height;
+	
+	// knob outline (shadow is drawn in the toggle layer)
+	CGContextSetStrokeColorWithColor(context, [[NSColor colorWithCalibratedWhite:0.62 alpha:1.0] CGColor]);
+	CGContextSetLineWidth(context, 1.5);
+	CGContextStrokeEllipseInRect(context, knobRect);
+	CGContextSetShadowWithColor(context, CGSizeMake(0, 0), 0, NULL);
+	
+	// knob inner gradient
+	CGContextAddEllipseInRect(context, knobRect);
+	CGContextClip(context);
+	CGColorRef knobStartColor = [[NSColor colorWithCalibratedWhite:0.82 alpha:1.0] CGColor];
+	CGColorRef knobEndColor = ([self isActive]) ? [[NSColor colorWithCalibratedWhite:0.894 alpha:1.0] CGColor] : [[NSColor colorWithCalibratedWhite:0.996 alpha:1.0] CGColor];
+	CGPoint topPoint = CGPointMake(0, 0);
+	CGPoint bottomPoint = CGPointMake(0, knobRadius + 2);
+	CGGradientRef knobGradient = CreateGradientRefWithColors(colorSpace, knobStartColor, knobEndColor);
+	CGContextDrawLinearGradient(context, knobGradient, topPoint, bottomPoint, 0);
+	CGGradientRelease(knobGradient);
+	
+	// knob inner highlight
+	CGContextAddEllipseInRect(context, CGRectInset(knobRect, 0.5, 0.5));
+	CGContextAddEllipseInRect(context, CGRectInset(knobRect, 1.5, 1.5));
+	CGContextEOClip(context);
+	CGGradientRef knobHighlightGradient = CreateGradientRefWithColors(colorSpace, [[NSColor whiteColor] CGColor], [[NSColor colorWithCalibratedWhite:1.0 alpha:0.5] CGColor]);
+	CGContextDrawLinearGradient(context, knobHighlightGradient, topPoint, bottomPoint, 0);
+	CGGradientRelease(knobHighlightGradient);
+	
+	CGColorSpaceRelease(colorSpace);
+}
+
+- (void)drawOnLayer:(CALayer *)layer inContext:(CGContextRef)context {
+	
+}
+
+- (void)drawOffLayer:(CALayer *)layer inContext:(CGContextRef)context {
+	
+}
+
+CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef startColor, CGColorRef endColor) {
+	CGFloat colorStops[2] = {0.0, 1.0};
+	CGColorRef colors[] = {startColor, endColor};
+	CFArrayRef colorsArray = CFArrayCreate(NULL, (const void**)colors, sizeof(colors) / sizeof(CGColorRef), &kCFTypeArrayCallBacks);
+	CGGradientRef gradient = CGGradientCreateWithColors(colorSpace, colorsArray, colorStops);
+	CFRelease(colorsArray);
+	return gradient;
 }
 
 @end

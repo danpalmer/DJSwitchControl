@@ -146,6 +146,21 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 	[self setWantsLayer:YES];
 }
 
+- (void)viewDidMoveToWindow {
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidChangeScreen:) name:NSWindowDidChangeScreenNotification object:nil];
+}
+
+- (void)windowDidChangeScreen:(NSNotification *)notification {
+	[[[self layer] sublayers] enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+		[CATransaction begin];
+		{
+			[CATransaction setDisableActions:YES];
+			[(CALayer *)obj setContentsScale:[[self window] backingScaleFactor]];
+		}
+		[CATransaction commit];
+	}];
+}
+
 - (void)setOn:(BOOL)on {
 	_on = on;
 	if (on) {
@@ -160,10 +175,16 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 
 - (void)mouseDown:(NSEvent *)event {
 	
+	NSPoint eventPoint = [event locationInWindow];
+	NSPoint localPoint = [self convertPoint:eventPoint fromView:nil];
+	__block NSInteger mouseOffset = localPoint.x;
 	__block NSInteger originalOffset = [[self knobLayer] frame].origin.x;
+	
 	[self setMouseTrackingBlock:^(NSEvent *currentEvent) {
 		
-		NSInteger newOffset = [[self knobLayer] frame].origin.x + [currentEvent deltaX];
+		NSPoint eventPoint = [currentEvent locationInWindow];
+		NSPoint localPoint = [self convertPoint:eventPoint fromView:nil];
+		NSInteger newOffset = originalOffset + (localPoint.x - mouseOffset);
 		
 		if ([currentEvent type] == NSLeftMouseDown) {
 			// change state to pressed

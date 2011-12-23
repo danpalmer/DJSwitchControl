@@ -17,6 +17,7 @@
 #define KNOB_DIAMETER 28.0
 #define KNOB_CORNER_RADIUS (KNOB_DIAMETER/2.0)
 #define KNOB_RADIUS (KNOB_DIAMETER/2.0)
+#define KNOB_PADDING 1
 
 #define BACKGROUND_SECTION_HEIGHT 30.0
 #define BACKGROUND_SECTION_WIDTH (CONTROL_WIDTH - (KNOB_DIAMETER / 2.0))
@@ -167,7 +168,7 @@ CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef
 	CALayer *rootLayer = [[[CALayer alloc] init] autorelease];
 	[rootLayer setName:DJSwitchControlLayerRoot];
 	[rootLayer setCornerRadius:CONTROL_CORNER_RADIUS];
-	[rootLayer setBorderWidth:1.0];
+	//[rootLayer setBorderWidth:1.0];
 	[rootLayer setBorderColor:[[NSColor blackColor] CGColor]];
 	[rootLayer setFrame:CGRectMake(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT)];
 	[rootLayer setMasksToBounds:YES];
@@ -176,7 +177,7 @@ CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef
 	CALayer *knobLayer = [[[CALayer alloc] init] autorelease];
 	{
 		[knobLayer setName:DJSwitchControlLayerKnob];
-		[knobLayer setFrame:CGRectMake(0, 1, KNOB_DIAMETER, KNOB_DIAMETER)];
+		[knobLayer setFrame:CGRectMake(KNOB_PADDING, KNOB_PADDING, KNOB_DIAMETER, KNOB_DIAMETER)];
 		[knobLayer setBackgroundColor:[[NSColor grayColor] CGColor]];
 		[knobLayer setCornerRadius:KNOB_CORNER_RADIUS];
 		[knobLayer setDelegate:self];
@@ -206,7 +207,7 @@ CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef
 			[offTextLayer setShadowOffset:CGSizeMake(0, -1)];
 			[offTextLayer setShadowColor:[[NSColor whiteColor] CGColor]];
 			[offTextLayer setShadowRadius:0.0];
-			[offTextLayer setShadowOpacity:0.5];
+			[offTextLayer setShadowOpacity:1.0];
 			
 			CGSize preferredSize = [offTextLayer preferredFrameSize];
 			[offTextLayer setFrame:CGRectMake(lroundf((((BACKGROUND_SECTION_WIDTH - KNOB_RADIUS) / 2.0) - (preferredSize.width / 2.0)) + (KNOB_RADIUS * 0.75)), 
@@ -240,9 +241,9 @@ CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef
 			
 			CGSize preferredSize = [onTextLayer preferredFrameSize];
 			[onTextLayer setFrame:CGRectMake(lroundf((((BACKGROUND_SECTION_WIDTH - KNOB_RADIUS) / 2.0) - (preferredSize.width / 2.0)) + (KNOB_RADIUS * 0.25)), 
-											  ((BACKGROUND_SECTION_HEIGHT / 2.0) - (preferredSize.height / 2.0)), 
-											  preferredSize.width, 
-											  preferredSize.height)];
+											 ((BACKGROUND_SECTION_HEIGHT / 2.0) - (preferredSize.height / 2.0)), 
+											 preferredSize.width, 
+											 preferredSize.height)];
 		}
 		[onLayer addSublayer:onTextLayer];
 		[onLayer setNeedsDisplay];
@@ -326,7 +327,7 @@ CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef
 		if ([currentEvent type] == NSLeftMouseUp) {
 			
 			if (originalOffset == newOffset) {
-				if (originalOffset == 0) {
+				if (originalOffset == KNOB_PADDING) {
 					[self setOn:YES];
 				} else {
 					[self setOn:NO];
@@ -377,12 +378,12 @@ CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef
 
 - (void)moveSwitchToNewOffset:(NSInteger)newOffset disableAnimations:(BOOL)disableAnimations {
 	
-	if (newOffset > (CONTROL_WIDTH - KNOB_DIAMETER)) {
-		newOffset = (CONTROL_WIDTH - KNOB_DIAMETER);
+	if (newOffset > (CONTROL_WIDTH - KNOB_DIAMETER) - KNOB_PADDING) {
+		newOffset = (CONTROL_WIDTH - KNOB_DIAMETER) - KNOB_PADDING;
 	}
 	
-	if (newOffset < 0) {
-		newOffset = 0;
+	if (newOffset < KNOB_PADDING) {
+		newOffset = KNOB_PADDING;
 	}
 	
 	CGRect newKnobRect = [[self knobLayer] frame];

@@ -83,8 +83,10 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 		[knobLayer setBackgroundColor:[[NSColor grayColor] CGColor]];
 		[knobLayer setCornerRadius:KNOB_CORNER_RADIUS];
 		[knobLayer setDelegate:self];
-		[self setKnobLayer:knobLayer];
+		[knobLayer setNeedsDisplay];
 	}
+	[self setKnobLayer:knobLayer];
+	
 	
 	CALayer *offLayer = [[[CALayer alloc] init] autorelease];
 	{
@@ -106,6 +108,7 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 											  preferredSize.height)];
 		}
 		[offLayer addSublayer:offTextLayer];
+		[offLayer setNeedsDisplay];
 	}
 	[self setOffLayer:offLayer];
 	
@@ -130,6 +133,7 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 											  preferredSize.height)];
 		}
 		[onLayer addSublayer:onTextLayer];
+		[onLayer setNeedsDisplay];
 	}
 	[self setOnLayer:onLayer];
 	
@@ -222,6 +226,10 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 
 - (void)drawLayer:(CALayer *)layer inContext:(CGContextRef)ctx {
 	NSLog(@"Drawing %@", [layer name]);
+}
+
+- (void)drawRect:(NSRect)dirtyRect {
+	
 }
 
 - (void)moveSwitchToNewOffset:(NSInteger)newOffset disableAnimations:(BOOL)disableAnimations {

@@ -1313,7 +1313,6 @@
 							<string key="NSFrame">{{20, 45}, {80, 30}}</string>
 							<reference key="NSSuperview" ref="439893737"/>
 							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView"/>
 							<string key="NSReuseIdentifierKey">_NS:1192</string>
 							<string key="NSClassName">DJSwitchControl</string>
 						</object>

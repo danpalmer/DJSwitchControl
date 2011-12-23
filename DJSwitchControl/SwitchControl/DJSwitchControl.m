@@ -28,6 +28,7 @@ NSString *const DJSwitchControlLayerRoot = @"rootLayer";
 NSString *const DJSwitchControlLayerKnob = @"knobLayer";
 NSString *const DJSwitchControlLayerOn = @"onLayer";
 NSString *const DJSwitchControlLayerOff = @"offLayer";
+NSString *const DJSwitchControlLayerInnerShadow = @"inerLayer";
 
 #pragma mark -
 #pragma mark Categories
@@ -35,10 +36,10 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 @interface NSColor (DJSwitchControlAdditions)
 - (CGColorRef)CGColor;
 + (NSColor *)onStateColor;
++ (NSColor *)offStateColor;
 @end
 
 @implementation NSColor (DJSwitchControlAdditions)
-
 - (CGColorRef)CGColor {
 	CGColorSpaceRef colorSpace = [[self colorSpace] CGColorSpace];
 	NSInteger componentCount = [self numberOfComponents];
@@ -52,7 +53,64 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 + (NSColor *)onStateColor {
 	return [NSColor colorWithDeviceRed:0.0000 green:0.4980 blue:0.9176 alpha:1.0000];
 }
++ (NSColor *)offStateColor {
+	return [NSColor colorWithDeviceRed:0.9333 green:0.9333 blue:0.9333 alpha:1.0000];
+}
+@end
 
+@interface NSBezierPath (DJSwitchControlAdditions)
+- (CGPathRef)CGPath;
+@end
+
+@implementation NSBezierPath (DJSwitchControlAdditions)
+
+// From the Apple documentation for NSBezierPath
+//   http://developer.apple.com/library/mac/#documentation/cocoa/Conceptual/CocoaDrawingGuide/Paths/Paths.html
+- (CGPathRef)CGPath {
+    NSInteger i, numElements;
+    CGPathRef immutablePath = NULL;
+    numElements = [self elementCount];
+	
+    if (numElements > 0) {
+        CGMutablePathRef path = CGPathCreateMutable();
+        NSPoint points[3];
+        BOOL didClosePath = YES;
+		
+        for (i = 0; i < numElements; i++) {
+            switch ([self elementAtIndex:i associatedPoints:points]) {
+                case NSMoveToBezierPathElement:
+                    CGPathMoveToPoint(path, NULL, points[0].x, points[0].y);
+                    break;
+					
+                case NSLineToBezierPathElement:
+                    CGPathAddLineToPoint(path, NULL, points[0].x, points[0].y);
+                    didClosePath = NO;
+                    break;
+					
+                case NSCurveToBezierPathElement:
+                    CGPathAddCurveToPoint(path, NULL, points[0].x, points[0].y,
+										  points[1].x, points[1].y,
+										  points[2].x, points[2].y);
+                    didClosePath = NO;
+                    break;
+					
+                case NSClosePathBezierPathElement:
+                    CGPathCloseSubpath(path);
+                    didClosePath = YES;
+                    break;
+            }
+        }
+		
+        if (!didClosePath) {
+			CGPathCloseSubpath(path);
+		}
+		
+        immutablePath = CGPathCreateCopy(path);
+        CGPathRelease(path);
+    }
+	
+    return immutablePath;
+}
 @end
 
 #pragma mark -
@@ -72,10 +130,12 @@ NSString *const DJSwitchControlLayerOff = @"offLayer";
 - (void)switchToOff;
 - (void)performAction;
 - (void)moveSwitchToNewOffset:(NSInteger)newOffset disableAnimations:(BOOL)disableAnimations;
-- (void)drawRootLayer:(CALayer *)layer inContext:(CGContextRef)context;
+- (void)drawInnerShadowLayer:(CALayer *)layer inContext:(CGContextRef)context;
 - (void)drawKnobLayer:(CALayer *)layer inContext:(CGContextRef)context;
 - (void)drawOnLayer:(CALayer *)layer inContext:(CGContextRef)context;
 - (void)drawOffLayer:(CALayer *)layer inContext:(CGContextRef)context;
+- (void)drawHighlightForLayer:(CALayer *)layer inContext:(CGContextRef)context withOpacity:(CGFloat)opacity;
+- (CGPathRef)newPathForRoundedRect:(CGRect)rect radius:(CGFloat)radius;
 CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef startColor, CGColorRef endColor);
 
 @end
@@ -111,6 +171,7 @@ CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef
 	[rootLayer setBorderColor:[[NSColor blackColor] CGColor]];
 	[rootLayer setFrame:CGRectMake(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT)];
 	[rootLayer setMasksToBounds:YES];
+	[rootLayer setDelegate:self];
 	
 	CALayer *knobLayer = [[[CALayer alloc] init] autorelease];
 	{
@@ -133,7 +194,7 @@ CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef
 	{
 		[offLayer setName:DJSwitchControlLayerOff];
 		[offLayer setFrame:CGRectMake(KNOB_RADIUS, 0, BACKGROUND_SECTION_WIDTH, BACKGROUND_SECTION_HEIGHT)];
-		[offLayer setBackgroundColor:[[NSColor whiteColor] CGColor]];
+		[offLayer setBackgroundColor:[[NSColor offStateColor] CGColor]];
 		[offLayer setDelegate:self];
 		CATextLayer *offTextLayer = [[[CATextLayer alloc] init] autorelease];
 		{
@@ -142,11 +203,10 @@ CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef
 			[offTextLayer setFont:@"Helvetica Neue Bold"];
 			[offTextLayer setForegroundColor:[[NSColor grayColor] CGColor]];
 			
-			// TODO: make this an inner shadow
-//			[offTextLayer setShadowOffset:CGSizeMake(0, 1)];
-//			[offTextLayer setShadowColor:[[NSColor blackColor] CGColor]];
-//			[offTextLayer setShadowRadius:0.0];
-//			[offTextLayer setShadowOpacity:0.5];
+			[offTextLayer setShadowOffset:CGSizeMake(0, -1)];
+			[offTextLayer setShadowColor:[[NSColor whiteColor] CGColor]];
+			[offTextLayer setShadowRadius:0.0];
+			[offTextLayer setShadowOpacity:0.5];
 			
 			CGSize preferredSize = [offTextLayer preferredFrameSize];
 			[offTextLayer setFrame:CGRectMake(lroundf((((BACKGROUND_SECTION_WIDTH - KNOB_RADIUS) / 2.0) - (preferredSize.width / 2.0)) + (KNOB_RADIUS * 0.75)), 
@@ -189,10 +249,18 @@ CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef
 	}
 	[self setOnLayer:onLayer];
 	
+	CALayer *innerShadowLayer = [[[CALayer alloc] init] autorelease];
+	[innerShadowLayer setName:DJSwitchControlLayerInnerShadow];
+	[innerShadowLayer setDelegate:self];
+	[innerShadowLayer setFrame:[rootLayer frame]];
+	[innerShadowLayer setNeedsDisplay];
 	
 	[rootLayer addSublayer:offLayer];
 	[rootLayer addSublayer:onLayer];
+	[rootLayer addSublayer:innerShadowLayer];
 	[rootLayer addSublayer:knobLayer];
+	
+	[rootLayer setNeedsDisplay];
 	
 	[self setLayer:rootLayer];
 	[self setWantsLayer:YES];
@@ -224,7 +292,7 @@ CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef
 
 - (void)setActive:(BOOL)active {
 	_active = active;
-	[self setNeedsDisplay:YES];
+	[[[self layer] sublayers] makeObjectsPerformSelector:@selector(setNeedsDisplay)];
 }
 
 - (void)setOnColor:(NSColor *)color {
@@ -259,9 +327,9 @@ CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef
 			
 			if (originalOffset == newOffset) {
 				if (originalOffset == 0) {
-					[self switchToOn];
+					[self setOn:YES];
 				} else {
-					[self switchToOff];
+					[self setOn:NO];
 				}
 			} else if (newOffset < ((CONTROL_WIDTH - KNOB_DIAMETER) / 2.0)) {
 				[self setOn:NO];
@@ -340,8 +408,8 @@ CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef
 }
 
 - (void)drawLayer:(CALayer *)layer inContext:(CGContextRef)ctx {
-	if ([[layer name] isEqual:DJSwitchControlLayerRoot]) {
-		[self drawRootLayer:layer inContext:ctx];
+	if ([[layer name] isEqual:DJSwitchControlLayerInnerShadow]) {
+		[self drawInnerShadowLayer:layer inContext:ctx];
 	} else if ([[layer name] isEqual:DJSwitchControlLayerKnob]) {
 		[self drawKnobLayer:layer inContext:ctx];
 	} else if ([[layer name] isEqual:DJSwitchControlLayerOn]) {
@@ -351,8 +419,26 @@ CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef
 	}
 }
 
-- (void)drawRootLayer:(CALayer *)layer inContext:(CGContextRef)context {
+- (void)drawInnerShadowLayer:(CALayer *)layer inContext:(CGContextRef)context {
+	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceGray();
 	
+	NSGraphicsContext *g = [NSGraphicsContext graphicsContextWithGraphicsPort:context flipped:NO];
+	[NSGraphicsContext saveGraphicsState];
+	[NSGraphicsContext setCurrentContext:g];
+    CGContextSaveGState(context);
+	
+	CGPathRef path = [self newPathForRoundedRect:[layer bounds] radius:(CONTROL_HEIGHT / 2.0)];
+	CGContextAddPath(context, path);
+    CGContextSetShadowWithColor(context, CGSizeMake(0.0, -2), 5.0, [[NSColor blackColor] CGColor]);
+	CGContextSetStrokeColorWithColor(context, [[NSColor blackColor] CGColor]);
+	CGContextSetLineWidth(context, 2.0);
+	CGContextStrokePath(context);
+	CGContextRestoreGState(context);
+	
+	
+	[NSGraphicsContext restoreGraphicsState];
+	
+	CGColorSpaceRelease(colorSpace);
 }
 
 - (void)drawKnobLayer:(CALayer *)layer inContext:(CGContextRef)context {
@@ -389,11 +475,66 @@ CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef
 }
 
 - (void)drawOnLayer:(CALayer *)layer inContext:(CGContextRef)context {
-	
+	[self drawHighlightForLayer:layer inContext:context withOpacity:0.4];
 }
 
 - (void)drawOffLayer:(CALayer *)layer inContext:(CGContextRef)context {
+	[self drawHighlightForLayer:layer inContext:context withOpacity:0.8];
+}
+
+- (void)drawHighlightForLayer:(CALayer *)layer inContext:(CGContextRef)context withOpacity:(CGFloat)opacity {
+	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceGray();
+	CGRect highlightRect = [layer bounds];
+	highlightRect.origin.y = highlightRect.origin.y - (CONTROL_HEIGHT / 2.0);
 	
+	NSGraphicsContext *g = [NSGraphicsContext graphicsContextWithGraphicsPort:context flipped:NO];
+	[NSGraphicsContext saveGraphicsState];
+	[NSGraphicsContext setCurrentContext:g];
+	CGContextSaveGState(context);
+	
+	CGPathRef roundedHighlightPath = [self newPathForRoundedRect:highlightRect radius:(CONTROL_HEIGHT / 2.0)];
+	CGContextAddPath(context, roundedHighlightPath);
+	CGContextSetFillColorWithColor(context, [[NSColor colorWithCalibratedWhite:1.0 alpha:opacity] CGColor]);
+	CGContextFillPath(context);
+	
+	CGContextRestoreGState(context);
+	[NSGraphicsContext restoreGraphicsState];
+	
+	CGColorSpaceRelease(colorSpace);
+}
+
+#pragma mark -
+#pragma mark Drawing Helper Methods
+
+- (CGPathRef)newPathForRoundedRect:(CGRect)rect radius:(CGFloat)radius {
+	CGMutablePathRef retPath = CGPathCreateMutable();
+	
+	CGRect innerRect = CGRectInset(rect, radius, radius);
+	
+	CGFloat inside_right = innerRect.origin.x + innerRect.size.width;
+	CGFloat outside_right = rect.origin.x + rect.size.width;
+	CGFloat inside_bottom = innerRect.origin.y + innerRect.size.height;
+	CGFloat outside_bottom = rect.origin.y + rect.size.height;
+	
+	CGFloat inside_top = innerRect.origin.y;
+	CGFloat outside_top = rect.origin.y;
+	CGFloat outside_left = rect.origin.x;
+	
+	CGPathMoveToPoint(retPath, NULL, innerRect.origin.x, outside_top);
+	
+	CGPathAddLineToPoint(retPath, NULL, inside_right, outside_top);
+	CGPathAddArcToPoint(retPath, NULL, outside_right, outside_top, outside_right, inside_top, radius);
+	CGPathAddLineToPoint(retPath, NULL, outside_right, inside_bottom);
+	CGPathAddArcToPoint(retPath, NULL,  outside_right, outside_bottom, inside_right, outside_bottom, radius);
+	
+	CGPathAddLineToPoint(retPath, NULL, innerRect.origin.x, outside_bottom);
+	CGPathAddArcToPoint(retPath, NULL,  outside_left, outside_bottom, outside_left, inside_bottom, radius);
+	CGPathAddLineToPoint(retPath, NULL, outside_left, inside_top);
+	CGPathAddArcToPoint(retPath, NULL,  outside_left, outside_top, innerRect.origin.x, outside_top, radius);
+	
+	CGPathCloseSubpath(retPath);
+	
+	return retPath;
 }
 
 CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef startColor, CGColorRef endColor) {

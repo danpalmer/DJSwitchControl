@@ -169,7 +169,7 @@ CGGradientRef CreateGradientRefWithColors(CGColorSpaceRef colorSpace, CGColorRef
 	[rootLayer setName:DJSwitchControlLayerRoot];
 	[rootLayer setCornerRadius:CONTROL_CORNER_RADIUS];
 	//[rootLayer setBorderWidth:1.0];
-	[rootLayer setBorderColor:[[NSColor blackColor] CGColor]];
+	[rootLayer setBorderColor:[[NSColor colorWithCalibratedRed:0.0000 green:0.0000 blue:0.0000 alpha:0.2000] CGColor]];
 	[rootLayer setFrame:CGRectMake(0, 0, CONTROL_WIDTH, CONTROL_HEIGHT)];
 	[rootLayer setMasksToBounds:YES];
 	[rootLayer setDelegate:self];
